@@ -1,11 +1,11 @@
-const CACHE_NAME = 'glicogabi-v22'; 
+const CACHE_NAME = 'glicogabi-v23'; 
 
 const ASSETS = [
   'index.html',
   'HOME.HTML',
   'CONSULTA E EXAMES.HTML',
   'HISTÓRICO.HTML',
-  'ESTOQUE.HTML',
+  'ESTOQUE.html',
   'AJUSTES.HTML',
   'LEMBRETES.HTML',
   'ícone.png',
@@ -29,6 +29,3 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   e.respondWith(caches.match(e.request).then((res) => res || fetch(e.request)));
 });
-
-
-
