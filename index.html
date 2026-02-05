@@ -27,7 +27,6 @@
             overflow: hidden; 
         }
 
-        /* Container onde as páginas (Home, Ajustes, etc) aparecem */
         .content-container { 
             flex: 1; 
             background: white; 
@@ -42,7 +41,6 @@
             border: none; 
         }
 
-        /* Menu Inferior */
         .nav-tabs { 
             display: flex; 
             width: 100%; 
@@ -80,31 +78,27 @@
     <div class="nav-tabs">
         <button class="tab-btn active" onclick="navegar('HOME.HTML', this)"><i>🏠</i><span>Home</span></button>
         <button class="tab-btn" onclick="navegar('CONSULTA E EXAMES.HTML', this)"><i>🩺</i><span>Consultas</span></button>
-        <button class="tab-btn" onclick="navegar('HISTORICO.HTML', this)"><i>📅</i><span>Histórico</span></button>
-        <button class="tab-btn" onclick="navegar('ESTOQUE.HTML', this)"><i>📦</i><span>Estoque</span></button>
+        <button class="tab-btn" onclick="navegar('HISTÓRICO.HTML', this)"><i>📅</i><span>Histórico</span></button>
+        <button class="tab-btn" onclick="navegar('ESTOQUE.html', this)"><i>📦</i><span>Estoque</span></button>
         <button class="tab-btn" onclick="navegar('AJUSTES.HTML', this)"><i>⚙️</i><span>Ajustes</span></button>
         <button class="tab-btn" onclick="navegar('LEMBRETES.HTML', this)"><i>🔔</i><span>Alertas</span></button>
     </div>
 
     <script>
         function navegar(url, btn) {
-            // Troca a página no iframe
             document.getElementById('janela').src = url;
-            
-            // Muda o botão ativo no menu
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
         }
 
-        // Registro do Service Worker (Offline/PWA)
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                .then(reg => console.log('Service Worker registrado!', reg))
+                // Forçando a atualização do Service Worker com v=22
+                navigator.serviceWorker.register('sw.js?v=22')
+                .then(reg => console.log('Service Worker v22 registrado!'))
                 .catch(err => console.error('Falha ao registrar SW', err));
             });
         }
     </script>
 </body>
-
 </html>
