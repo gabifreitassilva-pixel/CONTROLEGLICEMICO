@@ -11,8 +11,8 @@
         .container { background: white; flex: 1; border-radius: 25px; margin: 5px; overflow-y: auto; display: flex; flex-direction: column; }
         .header { background: var(--primaria); color: white; padding: 20px; text-align: center; }
         
-        /* Área das Doses Puxadas de Ajustes */
-        .doses-topo { display: flex; gap: 8px; padding: 10px 15px; overflow-x: auto; background: #fff; }
+        /* Área das Doses que você cadastrou em AJUSTES */
+        .doses-topo { display: flex; gap: 8px; padding: 10px 15px; overflow-x: auto; background: #fff; border-bottom: 1px solid #eee; }
         .dose-item { background: #f4f0ff; border: 1px solid var(--primaria); border-radius: 10px; padding: 5px 10px; font-size: 11px; white-space: nowrap; color: var(--primaria); font-weight: bold; }
 
         .input-area { background: #f4f0ff; margin: 15px; padding: 15px; border-radius: 20px; display: flex; flex-direction: column; gap: 8px; }
@@ -33,7 +33,7 @@
         <div class="header"><h1>GlicoGabi</h1><p>Controle de Glicemia</p></div>
         
         <div id="listaDosesTopo" class="doses-topo">
-            <span class="dose-item">Nenhuma dose cadastrada</span>
+            <span class="dose-item">Carregando doses...</span>
         </div>
 
         <div class="input-area">
@@ -56,33 +56,33 @@
 
 <script>
     const CHAVE_BANCO = "gabi_database_v1"; 
-    const ALVO = 130; // Sua meta glicêmica
-    const FSI = 72;  // Seu Fator de Sensibilidade
+    const ALVO = 130; 
+    const FSI = 72;  
 
     window.onload = function() {
         const hoje = new Date().toISOString().split('T')[0];
         document.getElementById('data_r').value = hoje;
-        carregarDoses();
+        carregarDoses(); // Puxa as doses assim que abre
         renderizar(); 
     };
 
-    // Puxa as doses cadastradas na aba AJUSTES
+    // FUNÇÃO QUE CONECTA COM A ABA AJUSTES
     function carregarDoses() {
         const dosesCadastradas = JSON.parse(localStorage.getItem('gabi_ajustes_vFinal') || "[]");
         const areaDoses = document.getElementById('listaDosesTopo');
         if(dosesCadastradas.length > 0) {
             areaDoses.innerHTML = dosesCadastradas.map(d => `<span class="dose-item">${d.nome}: ${d.qtd}</span>`).join('');
+        } else {
+            areaDoses.innerHTML = '<span class="dose-item">Nenhuma dose em Ajustes</span>';
         }
     }
 
     function calcularSugestao(valor) {
-        if (valor < 70) return { msg: "Hipoglicemia! Consumir carboidrato rápido.", cor: "var(--vermelho)" };
+        if (valor < 70) return { msg: "Hipoglicemia! Consumir carboidrato.", cor: "var(--vermelho)" };
         if (valor <= 130) return { msg: "Valor excelente!", cor: "var(--verde)" };
-        if (valor <= 180) return { msg: "Valor elevado. Hidrate-se.", cor: "var(--laranja)" };
-        
-        // Cálculo de correção
+        if (valor <= 180) return { msg: "Elevado. Hidrate-se.", cor: "var(--laranja)" };
         const unidades = Math.ceil((valor - ALVO) / FSI);
-        return { msg: `Elevado. Sugestão: +${unidades}un Regular e água.`, cor: "var(--vermelho)" };
+        return { msg: `Alto. Sugestão: +${unidades}un Regular e água.`, cor: "var(--vermelho)" };
     }
 
     function salvar() {
@@ -91,7 +91,7 @@
         const data = document.getElementById('data_r').value;
         const hora = document.getElementById('hora_r').value || new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
         
-        if (!valor) return alert("Digite o valor da glicemia.");
+        if (!valor) return alert("Digite o valor.");
 
         const novoRegistro = { id: Date.now(), momento: document.getElementById('momento').value, valor: valor, data: data, hora: hora };
         const banco = JSON.parse(localStorage.getItem(CHAVE_BANCO) || "[]");
@@ -103,7 +103,7 @@
     }
 
     function excluir(id) {
-        if(!confirm("Deseja apagar?")) return;
+        if(!confirm("Apagar?")) return;
         let banco = JSON.parse(localStorage.getItem(CHAVE_BANCO) || "[]");
         banco = banco.filter(item => item.id !== id);
         localStorage.setItem(CHAVE_BANCO, JSON.stringify(banco));
