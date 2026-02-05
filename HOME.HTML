@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>GlicoGabi - Home</title>
+    <style>
+        :root { --primaria: #7e57ff; --laranja: #ff9800; --verde: #4caf50; --vermelho: #f44336; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f0f0; margin: 0; padding: 0; display: flex; justify-content: center; }
+        .outer-frame { border: 8px solid var(--primaria); border-radius: 35px; background: var(--primaria); width: 100%; height: 100vh; display: flex; flex-direction: column; }
+        .container { background: white; flex: 1; border-radius: 25px; margin: 5px; overflow-y: auto; display: flex; flex-direction: column; }
+        .header { background: var(--primaria); color: white; padding: 20px; text-align: center; }
+        
+        /* Área das Doses Puxadas de Ajustes */
+        .doses-topo { display: flex; gap: 8px; padding: 10px 15px; overflow-x: auto; background: #fff; }
+        .dose-item { background: #f4f0ff; border: 1px solid var(--primaria); border-radius: 10px; padding: 5px 10px; font-size: 11px; white-space: nowrap; color: var(--primaria); font-weight: bold; }
+
+        .input-area { background: #f4f0ff; margin: 15px; padding: 15px; border-radius: 20px; display: flex; flex-direction: column; gap: 8px; }
+        select, input, button { padding: 12px; border-radius: 10px; border: 1px solid #ddd; font-size: 14px; outline: none; }
+        button { background: var(--primaria); color: white; font-weight: bold; border: none; cursor: pointer; }
+        
+        .history-list { padding: 0 15px 20px; }
+        .card { background: white; border-radius: 15px; margin-bottom: 12px; padding: 15px; border-left: 5px solid var(--laranja); box-shadow: 0 2px 8px rgba(0,0,0,.05); position: relative; }
+        .card-header { font-size: 14px; font-weight: bold; color: var(--primaria); margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; }
+        .card-val { font-size: 24px; font-weight: bold; }
+        .sugestao { font-size: 13px; font-weight: bold; margin-top: 5px; }
+        .btn-excluir { color: #ff4444; font-size: 20px; cursor: pointer; border: none; background: none; }
+    </style>
+</head>
+<body>
+<div class="outer-frame">
+    <div class="container">
+        <div class="header"><h1>GlicoGabi</h1><p>Controle de Glicemia</p></div>
+        
+        <div id="listaDosesTopo" class="doses-topo">
+            <span class="dose-item">Nenhuma dose cadastrada</span>
+        </div>
+
+        <div class="input-area">
+            <select id="momento">
+                <option>Jejum</option><option>Pós café</option><option>Antes do almoço</option>
+                <option>Depois do almoço</option><option>Antes da janta</option><option>Depois da janta</option>
+                <option>Antes de Dormir</option><option>Madrugada</option>
+            </select>
+            <input type="number" id="glicemia" placeholder="Valor mg/dL">
+            <div style="display: flex; gap: 5px;">
+                <input type="date" id="data_r" style="flex: 2;">
+                <input type="time" id="hora_r" style="flex: 1;">
+            </div>
+            <button onclick="salvar()">Gravar Medição</button>
+        </div>
+
+        <div id="historico" class="history-list"></div>
+    </div>
+</div>
+
+<script>
+    const CHAVE_BANCO = "gabi_database_v1"; 
+    const ALVO = 130; // Sua meta glicêmica
+    const FSI = 72;  // Seu Fator de Sensibilidade
+
+    window.onload = function() {
+        const hoje = new Date().toISOString().split('T')[0];
+        document.getElementById('data_r').value = hoje;
+        carregarDoses();
+        renderizar(); 
+    };
+
+    // Puxa as doses cadastradas na aba AJUSTES
+    function carregarDoses() {
+        const dosesCadastradas = JSON.parse(localStorage.getItem('gabi_ajustes_vFinal') || "[]");
+        const areaDoses = document.getElementById('listaDosesTopo');
+        if(dosesCadastradas.length > 0) {
+            areaDoses.innerHTML = dosesCadastradas.map(d => `<span class="dose-item">${d.nome}: ${d.qtd}</span>`).join('');
+        }
+    }
+
+    function calcularSugestao(valor) {
+        if (valor < 70) return { msg: "Hipoglicemia! Consumir carboidrato rápido.", cor: "var(--vermelho)" };
+        if (valor <= 130) return { msg: "Valor excelente!", cor: "var(--verde)" };
+        if (valor <= 180) return { msg: "Valor elevado. Hidrate-se.", cor: "var(--laranja)" };
+        
+        // Cálculo de correção
+        const unidades = Math.ceil((valor - ALVO) / FSI);
+        return { msg: `Elevado. Sugestão: +${unidades}un Regular e água.`, cor: "var(--vermelho)" };
+    }
+
+    function salvar() {
+        const valorInput = document.getElementById('glicemia');
+        const valor = parseInt(valorInput.value);
+        const data = document.getElementById('data_r').value;
+        const hora = document.getElementById('hora_r').value || new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+        
+        if (!valor) return alert("Digite o valor da glicemia.");
+
+        const novoRegistro = { id: Date.now(), momento: document.getElementById('momento').value, valor: valor, data: data, hora: hora };
+        const banco = JSON.parse(localStorage.getItem(CHAVE_BANCO) || "[]");
+        banco.push(novoRegistro);
+        localStorage.setItem(CHAVE_BANCO, JSON.stringify(banco));
+
+        valorInput.value = "";
+        renderizar();
+    }
+
+    function excluir(id) {
+        if(!confirm("Deseja apagar?")) return;
+        let banco = JSON.parse(localStorage.getItem(CHAVE_BANCO) || "[]");
+        banco = banco.filter(item => item.id !== id);
+        localStorage.setItem(CHAVE_BANCO, JSON.stringify(banco));
+        renderizar();
+    }
+
+    function renderizar() {
+        const lista = document.getElementById('historico');
+        const dataSelecionada = document.getElementById('data_r').value;
+        const banco = JSON.parse(localStorage.getItem(CHAVE_BANCO) || "[]");
+        lista.innerHTML = "";
+
+        const filtrados = banco.filter(item => item.data === dataSelecionada).sort((a,b) => a.hora.localeCompare(b.hora));
+
+        filtrados.forEach(item => {
+            const analise = calcularSugestao(item.valor);
+            lista.innerHTML += `
+                <div class="card" style="border-left-color: ${analise.cor}">
+                    <div class="card-header"><span>${item.momento}</span><button class="btn-excluir" onclick="excluir(${item.id})">✕</button></div>
+                    <div class="card-val">${item.valor} <small>mg/dL</small></div>
+                    <div class="sugestao" style="color: ${analise.cor}">${analise.msg}</div>
+                    <div style="font-size: 11px; color: #999; margin-top:5px;">${item.data.split('-').reverse().join('/')} às ${item.hora}</div>
+                </div>`;
+        });
+    }
+    document.getElementById('data_r').addEventListener('change', renderizar);
+</script>
+</body>
+</html>
