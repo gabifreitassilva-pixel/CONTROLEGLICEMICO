@@ -4,7 +4,7 @@ const ASSETS = [
   'index.html',
   'HOME.HTML',
   'CONSULTA E EXAMES.HTML',
-  'HISTORICO.HTML', // Sem acento aqui
+  'HISTORICO.HTML', 
   'ESTOQUE.HTML',
   'AJUSTES.HTML',
   'LEMBRETES.HTML',
@@ -29,3 +29,4 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   e.respondWith(caches.match(e.request).then((res) => res || fetch(e.request)));
 });
+
