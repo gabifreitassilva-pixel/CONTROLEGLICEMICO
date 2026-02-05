@@ -5,7 +5,7 @@ const ASSETS = [
   'HOME.HTML',
   'CONSULTA E EXAMES.HTML',
   'HISTÓRICO.HTML',
-  'ESTOQUE.HTML',
+  'estoque.html',
   'AJUSTES.HTML',
   'LEMBRETES.HTML',
   'ícone.png',
@@ -29,4 +29,5 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   e.respondWith(caches.match(e.request).then((res) => res || fetch(e.request)));
 });
+
 
