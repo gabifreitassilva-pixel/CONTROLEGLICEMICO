@@ -7,7 +7,7 @@ const ASSETS = [
   'ESTOQUE.HTML',
   'AJUSTES.HTML',
   'LEMBRETES.HTML',
-  'ÍCONE.PNG',
+  'icone.png',
   'MANIFEST.JSON'
 ];
 
@@ -27,5 +27,6 @@ self.addEventListener('fetch', (e) => {
   );
 
 });
+
 
 
