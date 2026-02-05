@@ -7,8 +7,8 @@ const ASSETS = [
   'ESTOQUES.HTML',
   'AJUSTES.HTML',
   'LEMBRETES.HTML',
-  'ICONE.png',
-  'manifest.json'
+  'ÍCONE.png',
+  'MANIFEST.JSON'
 ];
 
 self.addEventListener('install', (e) => {
@@ -25,4 +25,5 @@ self.addEventListener('fetch', (e) => {
       return res || fetch(e.request);
     })
   );
+
 });
