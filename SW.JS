@@ -3,8 +3,8 @@ const ASSETS = [
   'index.html',
   'HOME.HTML',
   'CONSULTA E EXAMES.HTML',
-  'HISTORICO.HTML',
-  'ESTOQUES.HTML',
+  'HISTÓRICO.HTML',
+  'ESTOQUE.HTML',
   'AJUSTES.HTML',
   'LEMBRETES.HTML',
   'ÍCONE.PNG',
@@ -27,4 +27,5 @@ self.addEventListener('fetch', (e) => {
   );
 
 });
+
 
